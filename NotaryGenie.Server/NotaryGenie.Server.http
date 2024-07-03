@@ -1,0 +1,6 @@
+@NotaryGenie.Server_HostAddress = http://localhost:5201
+
+GET {{NotaryGenie.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
