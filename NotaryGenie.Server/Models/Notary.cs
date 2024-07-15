@@ -6,6 +6,19 @@
         public string Name { get; set; }
         public string Email { get; set; }
 
-        public required ICollection<Client> Clients { get; set; }
+        public ICollection<Client> Clients { get; set; }
+
+        public Notary()
+        {
+            Clients = new List<Client>();
+        }
+
+        public Notary(int notaryID, string name, string email, ICollection<Client> clients)
+        {
+            NotaryID = notaryID;
+            Name = name;
+            Email = email;
+            Clients = clients ?? new List<Client>();
+        }
     }
 }
