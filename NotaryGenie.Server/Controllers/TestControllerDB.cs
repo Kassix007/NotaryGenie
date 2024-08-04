@@ -23,4 +23,4 @@ public class TestControllerDB(ApplicationDbContext context) : ControllerBase
             return StatusCode(500, new { success = false, message = "Database connection failed.", error = ex.Message });
         }
     }
-}
+}   

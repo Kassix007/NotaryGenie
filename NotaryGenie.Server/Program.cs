@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NotaryGenie.Server.Data;
+using NotaryGenie.Server.Services.Documents;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,8 @@ builder.Services.AddSwaggerGen();
 // Add the ApplicationDbContext and configure it to use SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+//register services
+builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 var app = builder.Build();
 

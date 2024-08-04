@@ -1,74 +1,79 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using global::NotaryGenie.Server.Services.Documents;
+using Microsoft.AspNetCore.Mvc;
 using NotaryGenie.Server.Data;
 using NotaryGenie.Server.Models;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-
 namespace NotaryGenie.Server.Controllers
 {
+
     [Route("api/[controller]")]
-    [ApiController]
-    public class DocumentsController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-
-        public DocumentsController(ApplicationDbContext context)
+        [ApiController]
+        public class DocumentsController : ControllerBase
         {
-            _context = context;
-        }
+            private readonly ApplicationDbContext _context;
+            private readonly IDocumentService _documentService;
+            private readonly ILogger<DocumentsController> _logger;
 
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadDocument(IFormFile file, int clientId, string documentName, string description)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("File not selected");
-
-            var client = await _context.Clients.FindAsync(clientId);
-            if (client == null)
-                return NotFound("Client not found");
-
-            var storagePath = Path.Combine(Directory.GetCurrentDirectory(), "DocumentStorage");
-            if (!Directory.Exists(storagePath))
+            public DocumentsController(ApplicationDbContext context, IDocumentService documentService, ILogger<DocumentsController> logger)
             {
-                Directory.CreateDirectory(storagePath);
+                _context = context;
+                _documentService = documentService;
+                _logger = logger;
             }
 
-            var filePath = Path.Combine(storagePath, file.FileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            [HttpPost("upload")]
+            public async Task<IActionResult> UploadDocument(IFormFile file, int clientId, string documentName, string description)
             {
-                await file.CopyToAsync(stream);
-            }
-
-            var document = new Document(clientId, documentName, DateTime.UtcNow, filePath)
-            {
-                Client = client
-            };
-
-            _context.Documents.Add(document);
-            await _context.SaveChangesAsync();
-
-            var keywords = ExtractKeywords(filePath);
-            foreach (var keyword in keywords)
-            {
-                var documentIndex = new DocumentIndex
+                try
                 {
-                    DocumentID = document.DocumentID,
-                    Keyword = keyword,
-                    Location = filePath
-                };
-                _context.DocumentIndex.Add(documentIndex);
+                    if (file == null || file.Length == 0)
+                        return BadRequest("File not selected");
+                    var allowedExtensions = new[] { ".pdf", ".docx", ".txt", ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return BadRequest("Invalid file type.");
+                    }
+
+                    var client = await _context.Clients.FindAsync(clientId);
+                    if (client == null)
+                        return NotFound("Client not found");
+                    //upload file to dir docStorage using service
+                    var filePath = await _documentService.SaveFileAsync(file,(documentName+fileExtension));
+
+                    var document = new Document(clientId, documentName, DateTime.UtcNow, filePath)
+                    {
+                        ClientID = clientId,
+                        DocumentName = documentName,
+                        UploadDate = DateTime.UtcNow,
+                        FilePath = filePath
+                    };
+                    //add to db
+                    _context.Documents.Add(document);
+                    await _context.SaveChangesAsync();
+                    //todo : implement extract keywords
+                    var keywords = _documentService.ExtractKeywords(filePath);
+                    foreach (var keyword in keywords)
+                    {
+                        var documentIndex = new DocumentIndex
+                        {
+                            DocumentID = document.DocumentID,
+                            Keyword = keyword,
+                            Location = filePath
+                        };
+                        _context.DocumentIndex.Add(documentIndex);
+                    }
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { documentId = document.DocumentID });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while uploading the document.");
+                    return StatusCode(500, "An error occurred while uploading the document.");
+                }
             }
-            await _context.SaveChangesAsync();
-
-            return Ok(new { documentId = document.DocumentID });
         }
+    
 
-        private static string[] ExtractKeywords(string filePath)
-        {         
-            return new string[] { "keyword1", "keyword2" };
-        }
-    }
 }
