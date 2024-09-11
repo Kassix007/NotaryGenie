@@ -8,4 +8,11 @@
     <!-- Folder where production build objects will be placed -->
     <PublishAssetsDirectory>$(MSBuildProjectDirectory)\dist</PublishAssetsDirectory>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="src\Components\Header\" />
+    <Folder Include="src\Pages\dashboard\" />
+    <Folder Include="src\Pages\Client\" />
+    <Folder Include="src\Pages\Deeds\" />
+    <Folder Include="src\Pages\UploadDocuments\" />
+  </ItemGroup>
 </Project>

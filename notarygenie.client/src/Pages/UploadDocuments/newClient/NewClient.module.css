@@ -1,0 +1,79 @@
+
+.title {
+    text-align: center;
+    color: #333;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.uploaded {
+    background-color: #8ef78e;
+}
+
+.label {
+    font-weight: bold;
+    color: #444;
+}
+
+.fileInput {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.checkbox {
+    margin-right: 10px;
+}
+
+.select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.submitButton {
+    padding: 10px 20px;
+    background-color: #291721;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.submitButton:hover {
+    background-color: #945959;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .form {
+        gap: 15px;
+    }
+
+    .formGroup {
+        padding: 8px;
+    }
+
+    .fileInput, .select, .submitButton {
+        font-size: 14px;
+    }
+}

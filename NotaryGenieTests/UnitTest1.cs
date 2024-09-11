@@ -9,3 +9,8 @@ namespace NotaryGenieTests
         }
     }
 }
+//generate code coverage report
+
+//  dotnet test /p:CollectCoverage=true
+
+// reportgenerator - reports:C:\CoverageResults\coverage.cobertura.xml -targetdir:C:/ CoverageResults

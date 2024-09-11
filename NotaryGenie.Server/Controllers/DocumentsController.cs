@@ -21,7 +21,7 @@ namespace NotaryGenie.Server.Controllers
             }
 
             [HttpPost("upload")]
-            public async Task<IActionResult> UploadDocument(IFormFile file, int clientId, string documentName, string description)
+            public async Task<IActionResult> UploadDocument(IFormFile file, int clientId, string documentName, string description, string keyword)
             {
                 try
                 {
@@ -51,10 +51,7 @@ namespace NotaryGenie.Server.Controllers
                     //add to db
                     _context.Documents.Add(document);
                     await _context.SaveChangesAsync();
-                    //todo : implement extract keywords
-                    var keywords = _documentService.ExtractKeywords(filePath);
-                    foreach (var keyword in keywords)
-                    {
+
                         var documentIndex = new DocumentIndex
                         {
                             DocumentID = document.DocumentID,
@@ -62,7 +59,7 @@ namespace NotaryGenie.Server.Controllers
                             Location = filePath
                         };
                         _context.DocumentIndex.Add(documentIndex);
-                    }
+                    
                     await _context.SaveChangesAsync();
 
                     return Ok(new { documentId = document.DocumentID });
